@@ -3,14 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Diario di palestra</title>
-<meta name="theme-color" content="#EEF1F3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#12171D" media="(prefers-color-scheme: dark)">
+<title>LiftLog · Diario di palestra</title>
+<meta name="theme-color" content="#F6F5EE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1A16" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Palestra">
+<meta name="apple-mobile-web-app-title" content="LiftLog">
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
 <link rel="icon" href="/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,23 +19,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#EEF1F3; --surface:#FFFFFF; --surface2:#F6F8F9; --ink:#16212E; --muted:#5B6774; --line:#D5DBE0;
+  --bg:#F6F5EE; --surface:#FFFFFF; --surface2:#EFEEE4; --ink:#14332A; --muted:#5A6660; --line:#DCDACB;
   --push:#C8243A; --pull:#1E5AA8; --legs:#C99300; --core:#2E7D52;
-  --focus:#1E5AA8; --warn:#A8561B; --ok:#2E7D52;
+  --focus:#14332A; --warn:#A8561B; --ok:#2E7D52;
+  --accent:#F5E04A; --on-accent:#14332A; --accent-line:#D9A520;
   color-scheme: light;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#12171D; --surface:#1B222B; --surface2:#222A34; --ink:#E9EDF1; --muted:#9AA6B2; --line:#303A46;
-    --push:#E5576A; --pull:#5B93E0; --legs:#E8B52A; --core:#4CB17D; --focus:#7FB0F0; --warn:#E39A5C; --ok:#4CB17D;
+    --bg:#0E1A16; --surface:#15241F; --surface2:#1C2E28; --ink:#EEF0E6; --muted:#9DA9A2; --line:#2A3D36;
+    --push:#E5576A; --pull:#5B93E0; --legs:#E8B52A; --core:#4CB17D; --focus:#F5E04A; --warn:#E39A5C; --ok:#4CB17D;
+    --accent:#F5E04A; --on-accent:#14332A; --accent-line:#F5E04A;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#12171D; --surface:#1B222B; --surface2:#222A34; --ink:#E9EDF1; --muted:#9AA6B2; --line:#303A46;
-  --push:#E5576A; --pull:#5B93E0; --legs:#E8B52A; --core:#4CB17D; --focus:#7FB0F0; --warn:#E39A5C; --ok:#4CB17D;
+  --bg:#0E1A16; --surface:#15241F; --surface2:#1C2E28; --ink:#EEF0E6; --muted:#9DA9A2; --line:#2A3D36;
+  --push:#E5576A; --pull:#5B93E0; --legs:#E8B52A; --core:#4CB17D; --focus:#F5E04A; --warn:#E39A5C; --ok:#4CB17D;
+  --accent:#F5E04A; --on-accent:#14332A; --accent-line:#F5E04A;
   color-scheme: dark;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -50,12 +54,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
 .topin{max-width:860px;margin:0 auto;padding:12px 16px 0;display:flex;flex-direction:column;gap:8px}
-.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-.brand h1{font-size:28px;font-weight:700}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand h1{font-size:28px;font-weight:700;display:flex;align-items:center;gap:10px}
+.brand h1 img{width:36px;height:36px;flex:none}
 .brand small{color:var(--muted);font-size:13px}
 nav.tabs{display:flex;gap:4px;overflow-x:auto}
 nav.tabs button{border:0;background:none;padding:10px 14px;font-family:"Barlow Condensed",sans-serif;font-size:19px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
-nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent-line)}
 
 /* Week strip — the plates */
 .week{margin:24px 0 8px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:end}
@@ -79,7 +84,7 @@ label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mu
 input[type=text],input[type=number],input[type=date],select,textarea{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:42px;width:100%}
 textarea{min-height:64px;resize:vertical}
 .btn{border:1px solid var(--line);background:var(--surface2);border-radius:8px;padding:9px 14px;min-height:42px;cursor:pointer;font-weight:600}
-.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent-line)}
 .btn.ghost{background:none;border-color:transparent;color:var(--muted)}
 .btn.danger{color:var(--push)}
 .btn:disabled{opacity:.5;cursor:default}
@@ -150,7 +155,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 <body>
 <header class="top">
   <div class="topin">
-    <div class="brand"><h1>Diario di palestra</h1><small id="saveMode"></small></div>
+    <div class="brand"><h1><img src="/logo-animated.svg" alt="">LiftLog</h1><small id="saveMode"></small></div>
     <nav class="tabs" role="tablist">
       <button role="tab" data-tab="log" aria-selected="true">Allenamento</button>
       <button role="tab" data-tab="progress" aria-selected="false">Progressi</button>
