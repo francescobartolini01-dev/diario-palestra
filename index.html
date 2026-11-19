@@ -10,9 +10,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="LiftLog">
-<script>
-try{var th=localStorage.getItem("liftlog-theme");if(th==="light"||th==="dark"){document.documentElement.dataset.theme=th;document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.content=th==="dark"?"#0E1A16":"#F6F5EE"})}}catch(e){}
-</script>
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/logo.svg" type="image/svg+xml">
 <link rel="icon" href="/icon-192.png" type="image/png">
@@ -60,12 +57,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .brand h1{font-size:28px;font-weight:700;display:flex;align-items:center;gap:10px}
 .brand h1 img{width:36px;height:36px;flex:none}
-.brand small{color:var(--muted);font-size:13px;text-align:right}
-.hright{display:flex;align-items:center;gap:10px;min-width:0}
-.themebtn{flex:none;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
-.themebtn:hover{border-color:var(--accent-line)}
-.themebtn svg{width:20px;height:20px}
-@media (prefers-reduced-motion:no-preference){.themebtn svg{animation:spinIn .4s ease-out}@keyframes spinIn{from{transform:rotate(-90deg) scale(.6);opacity:0}}}
+.brand small{color:var(--muted);font-size:13px}
 nav.tabs{display:flex;gap:4px;overflow-x:auto}
 nav.tabs button{border:0;background:none;padding:10px 14px;font-family:"Barlow Condensed",sans-serif;font-size:19px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
 nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent-line)}
@@ -89,7 +81,7 @@ section.card{background:var(--surface);border:1px solid var(--line);border-radiu
 section.card h3{font-size:24px;font-weight:700;margin-bottom:12px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
 label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
-input[type=text],input[type=number],input[type=date],input[type=email],input[type=password],select,textarea{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:42px;width:100%}
+input[type=text],input[type=number],input[type=date],select,textarea{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:42px;width:100%}
 textarea{min-height:64px;resize:vertical}
 .btn{border:1px solid var(--line);background:var(--surface2);border-radius:8px;padding:9px 14px;min-height:42px;cursor:pointer;font-weight:600}
 .btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent-line)}
@@ -132,12 +124,6 @@ textarea{min-height:64px;resize:vertical}
 .seg2 button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .period{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 0}
 .period h2{font-size:clamp(28px,6vw,40px);font-weight:700;text-align:center;flex:1}
-.period .btn{font-size:24px;min-width:48px;min-height:48px;line-height:1}
-.pick{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px}
-.pick select{width:100%;max-width:440px;font-family:"Barlow Condensed",sans-serif;font-size:clamp(22px,5vw,30px);font-weight:700;text-align:center;text-align-last:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;min-height:52px;padding:6px 12px;cursor:pointer}
-.pick small{font-size:13px;color:var(--muted)}
-.rptabs{display:flex;width:100%}
-.rptabs button{flex:1;padding:12px 14px;font-size:16px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:18px}
 .stats div{background:var(--surface);padding:14px}
 .stats b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:32px;font-weight:700;line-height:1.1}
@@ -162,15 +148,6 @@ dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface)
 dialog::backdrop{background:rgba(0,0,0,.4)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .quick{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.auth{max-width:420px;margin:32px auto 0}
-.auth form{display:grid;gap:12px}
-.auth .err{color:var(--push);font-size:14px;margin:0}
-.auth .alt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin-top:14px}
-.auth .alt .btn.ghost{padding-left:0;padding-right:0}
-nav.tabs[hidden]{display:none}
-.pw{position:relative;display:block}
-.pw input{padding-right:84px}
-.pw button{position:absolute;right:4px;bottom:4px;min-height:34px;padding:4px 10px;font-size:14px}
 .tpl{border-top:1px solid var(--line);padding:16px 0}
 .tpl:first-of-type{border-top:0}
 .tpl h4{margin:0;font-family:"Barlow Condensed",sans-serif;font-size:26px;font-weight:700;line-height:1.1}
@@ -191,6 +168,9 @@ nav.tabs[hidden]{display:none}
 .delta.up{color:var(--ok)}
 .delta.down{color:var(--warn)}
 .sumbtns{position:sticky;bottom:-20px;background:var(--surface);padding:14px 0 4px;margin-top:16px;justify-content:flex-end}
+.goal{font-size:14px;margin-top:4px}
+.goal b{font-weight:600}
+.tplnote{margin:8px 0 0;white-space:pre-wrap}
 .chips label{border:1px solid var(--line);border-radius:99px;padding:5px 10px;font-size:14px;cursor:pointer;display:flex;gap:6px;align-items:center}
 @media (max-width:560px){
   .mbar{grid-template-columns:92px 1fr 52px}
@@ -205,7 +185,7 @@ nav.tabs[hidden]{display:none}
 <body>
 <header class="top">
   <div class="topin">
-    <div class="brand"><h1><img src="/logo-animated.svg" alt="">LiftLog</h1><div class="hright"><small id="saveMode"></small><button type="button" class="themebtn" id="themeBtn"></button></div></div>
+    <div class="brand"><h1><img src="/logo-animated.svg" alt="">LiftLog</h1><small id="saveMode"></small></div>
     <nav class="tabs" role="tablist">
       <button role="tab" data-tab="log" aria-selected="true">Allenamento</button>
       <button role="tab" data-tab="plans" aria-selected="false">Schede</button>
@@ -241,14 +221,12 @@ nav.tabs[hidden]{display:none}
   </div>
 </dialog>
 
-<script src="/config.js"></script>
-<script src="/supabase.js"></script>
 <script>
 /* ---------- Dati di riferimento ---------- */
 const MUSCLES = {
   "Petto":"push","Spalle":"push","Tricipiti":"push",
   "Dorsali":"pull","Schiena alta":"pull","Lombari":"pull","Bicipiti":"pull",
-  "Quadricipiti":"legs","Femorali":"legs","Glutei":"legs","Polpacci":"legs",
+  "Quadricipiti":"legs","Femorali":"legs","Glutei":"legs","Polpacci":"legs","Adduttori":"legs",
   "Addome":"core","Cardio":"core"
 };
 const BIG = new Set(["Petto","Dorsali","Quadricipiti","Femorali","Glutei","Lombari"]);
@@ -306,178 +284,40 @@ const num=v=>{const n=parseFloat(String(v).replace(",","."));return isFinite(n)?
 const r1=n=>Math.round(n*10)/10;
 
 /* ---------- Stato e salvataggio ---------- */
-const S={ready:false,mode:"local",workouts:[],weights:[],custom:{},templates:[],trash:{},owner:null,dirty:false};
+const S={ready:false,mode:"local",workouts:[],weights:[],custom:{},templates:[]};
 const LS_KEY="diario-palestra-v1";
 
-// Ogni elemento salvato riceve "u" (ora dell'ultima modifica). Le cancellazioni lasciano una traccia in S.trash,
-// così, unendo i dati di PC e telefono, un elemento eliminato su un dispositivo non ricompare dall'altro.
-const pack=()=>({workouts:S.workouts,weights:S.weights,custom:S.custom,templates:S.templates,trash:S.trash});
 function loadLocal(){
-  try{const o=JSON.parse(localStorage.getItem(LS_KEY)||"{}");S.workouts=o.workouts||[];S.weights=o.weights||[];S.custom=o.custom||{};S.templates=o.templates||[];
-    S.trash=o.trash||{};S.owner=o.owner||null;S.dirty=!!o.dirty}catch(e){}
+  try{const o=JSON.parse(localStorage.getItem(LS_KEY)||"{}");S.workouts=o.workouts||[];S.weights=o.weights||[];S.custom=o.custom||{};S.templates=o.templates||[]}catch(e){}
 }
-function writeLocal(){
-  try{localStorage.setItem(LS_KEY,JSON.stringify({...pack(),owner:S.owner,dirty:S.dirty}))}catch(e){}
+function saveLocal(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify({workouts:S.workouts,weights:S.weights,custom:S.custom,templates:S.templates}))}catch(e){}
 }
-function saveLocal(){S.dirty=true;writeLocal();scheduleSync()}
-const stamp=x=>{x.u=Date.now();return x};
-const bury=(ns,id)=>{S.trash[ns+id]=Date.now()};
+async function boot(){
+  loadLocal();S.ready=true;render();
+  try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
+}
 async function putWorkout(w){
-  stamp(w);const i=S.workouts.findIndex(x=>x.id===w.id); if(i>=0)S.workouts[i]=w; else S.workouts.push(w);
+  const i=S.workouts.findIndex(x=>x.id===w.id); if(i>=0)S.workouts[i]=w; else S.workouts.push(w);
   saveLocal();
 }
 async function delWorkout(id){
-  S.workouts=S.workouts.filter(x=>x.id!==id);bury("w:",id);
+  S.workouts=S.workouts.filter(x=>x.id!==id);
   saveLocal();
 }
 async function putWeight(p){
-  stamp(p);const i=S.weights.findIndex(x=>x.id===p.id); if(i>=0)S.weights[i]=p; else S.weights.push(p);
+  const i=S.weights.findIndex(x=>x.id===p.id); if(i>=0)S.weights[i]=p; else S.weights.push(p);
   saveLocal();
 }
 async function delWeight(id){
-  S.weights=S.weights.filter(x=>x.id!==id);bury("p:",id);
+  S.weights=S.weights.filter(x=>x.id!==id);
   saveLocal();
 }
 async function putCustom(){
   saveLocal();
 }
-
-/* ---------- Unione dei dati tra dispositivi ---------- */
-function mergeList(a,b,ns,trash){
-  const m=new Map();for(const x of [...(a||[]),...(b||[])]){if(!x||x.id==null)continue;const o=m.get(x.id);if(!o||(x.u||0)>(o.u||0))m.set(x.id,x)}
-  return [...m.values()].filter(x=>!((trash[ns+x.id]||0)>(x.u||0)));
-}
-function mergeData(L,R){
-  const trash={},old=Date.now()-180*864e5;
-  for(const src of [R.trash||{},L.trash||{}])for(const [k,v] of Object.entries(src))if(v>old&&!(trash[k]>=v))trash[k]=v;
-  return {workouts:mergeList(L.workouts,R.workouts,"w:",trash),weights:mergeList(L.weights,R.weights,"p:",trash),
-    templates:mergeList(L.templates,R.templates,"t:",trash),custom:{...(R.custom||{}),...(L.custom||{})},trash};
-}
-const stable=v=>Array.isArray(v)?"["+v.map(stable).join(",")+"]":v&&typeof v==="object"?"{"+Object.keys(v).sort().map(k=>JSON.stringify(k)+":"+stable(v[k])).join(",")+"}":JSON.stringify(v);
-
-/* ---------- Account e sincronizzazione (Supabase) ---------- */
-const RECOVERY=/type=recovery/.test(location.hash+location.search);
-const CFG=window.LIFTLOG_CONFIG||{};
-const sb=CFG.supabaseUrl&&CFG.supabaseKey&&window.supabase?window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
-const CLOUD={user:null,status:"ok",busy:false,again:false,t:null};
-let AUTH={mode:"login",msg:"",err:"",email:"",busy:false};
-function setStatus(st){CLOUD.status=st;if(!toast.t)updateMode()}
-function scheduleSync(ms=800){if(!sb||!CLOUD.user)return;clearTimeout(CLOUD.t);CLOUD.t=setTimeout(sync,ms)}
-async function sync(){
-  if(!sb||!CLOUD.user)return;
-  if(!navigator.onLine){setStatus("offline");return}
-  if(CLOUD.busy){CLOUD.again=true;return}
-  CLOUD.busy=true;setStatus("sync");
-  try{
-    const uidNow=CLOUD.user.id;
-    const {data:row,error}=await sb.from("diari").select("data").eq("user_id",uidNow).maybeSingle();
-    if(error)throw error;
-    if(!CLOUD.user||CLOUD.user.id!==uidNow)return;
-    const before=stable(pack());
-    const merged=row&&row.data?mergeData(pack(),row.data):mergeData(pack(),{});
-    const changedHere=stable(merged)!==before;
-    S.workouts=merged.workouts;S.weights=merged.weights;S.templates=merged.templates;S.custom=merged.custom;S.trash=merged.trash;
-    if(!row||stable(row.data)!==stable(merged)){
-      const {error:e2}=await sb.from("diari").upsert({user_id:uidNow,data:merged,updated_at:new Date().toISOString()});
-      if(e2)throw e2;
-    }
-    S.dirty=false;writeLocal();setStatus("ok");
-    if(changedHere)safeRender();
-  }catch(e){setStatus(navigator.onLine?"err":"offline");clearTimeout(CLOUD.t);CLOUD.t=setTimeout(sync,20000)}
-  finally{CLOUD.busy=false;if(CLOUD.again){CLOUD.again=false;scheduleSync(300)}}
-}
-// Non ridisegnare la pagina mentre stai scrivendo in un campo: aspetta che tu esca dal campo.
-function safeRender(){const a=document.activeElement;if(a&&app.contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)){safeRender.wait=true;return}render()}
-document.addEventListener("focusout",()=>setTimeout(()=>{if(safeRender.wait){safeRender.wait=false;safeRender()}},0));
-function clearData(){S.workouts=[];S.weights=[];S.custom={};S.templates=[];S.trash={};S.dirty=false}
-async function setUser(user){
-  if(user&&CLOUD.user&&CLOUD.user.id===user.id)return;
-  CLOUD.user=user||null;
-  if(user){
-    // Dati rimasti da un altro account su questo dispositivo: non vanno uniti al tuo.
-    if(S.owner&&S.owner!==user.id)clearData();
-    S.owner=user.id;writeLocal();AUTH={mode:"login",msg:"",err:"",email:"",busy:false};
-    render();await sync();
-  }else render();
-}
-async function logout(){
-  if(S.dirty){
-    if(navigator.onLine)await sync();
-    if(S.dirty&&!confirm("Alcune modifiche non sono ancora state salvate online e andrebbero perse. Uscire comunque?"))return;
-  }
-  try{await sb.auth.signOut({scope:"local"})}catch(e){}
-  clearData();S.owner=null;try{localStorage.removeItem(LS_KEY)}catch(e){}
-  CLOUD.user=null;draft=newDraft();editTpl=null;TAB="log";AUTH={mode:"login",msg:"",err:"",email:"",busy:false};render();window.scrollTo(0,0);
-}
-const AUTH_ERR=e=>{const m=String(e&&e.message||e||"");
-  if(/invalid login credentials/i.test(m))return "Mail o password non corrette.";
-  if(/email not confirmed/i.test(m))return "Devi prima confermare la mail: apri il link che ti abbiamo mandato, poi accedi.";
-  if(/already registered|already exists/i.test(m))return "Esiste già un account con questa mail. Accedi, oppure recupera la password.";
-  if(/password.*(at least|short|weak)/i.test(m))return "La password è troppo debole: usa almeno 8 caratteri, meglio se con numeri e lettere.";
-  if(/rate limit|too many/i.test(m))return "Troppi tentativi in poco tempo. Aspetta qualche minuto e riprova.";
-  if(/fetch|network/i.test(m))return "Nessuna connessione. Controlla la rete e riprova.";
-  return "Non è andata a buon fine: "+m;};
-function pwField(id,label,ac){return `<label class="f">${label}<span class="pw"><input type="password" id="${id}" required minlength="8" autocomplete="${ac}"><button type="button" class="btn ghost" data-act="pwToggle" data-for="${id}">Mostra</button></span></label>`}
-function viewAuth(){
-  const A=AUTH,emailIn=`<label class="f">Mail<input type="email" id="aEmail" required autocomplete="email" inputmode="email" value="${esc(A.email)}"></label>`;
-  const msg=A.msg?`<p class="small" style="margin:0">${A.msg}</p>`:"",err=A.err?`<p class="err" role="alert">${esc(A.err)}</p>`:"";
-  const n=S.workouts.length,local=n&&!S.owner?`<p class="small muted" style="margin:0">${n===1?"L'allenamento già salvato su questo dispositivo verrà aggiunto":`I ${n} allenamenti già salvati su questo dispositivo verranno aggiunti`} al tuo account.</p>`:"";
-  const dis=A.busy?"disabled":"";
-  let body;
-  if(A.mode==="signup")body=`<h3>Crea il tuo account</h3><p class="small muted" style="margin:-6px 0 4px">Con lo stesso account vedi i tuoi allenamenti su PC e telefono.</p>
-    <form data-form="signup">${emailIn}${pwField("aPass","Password, almeno 8 caratteri","new-password")}${local}${err}<button class="btn primary" ${dis}>${A.busy?"Creo l'account…":"Crea account"}</button></form>
-    <div class="alt"><button class="btn ghost" data-act="authMode" data-m="login">Hai già un account? Accedi</button></div>`;
-  else if(A.mode==="check")body=`<h3>Controlla la mail</h3>${msg}<div class="alt"><button class="btn primary" data-act="authMode" data-m="login">Ho confermato, accedi</button></div>`;
-  else if(A.mode==="forgot")body=`<h3>Recupera la password</h3><p class="small muted" style="margin:-6px 0 4px">Ti mandiamo una mail con un link per sceglierne una nuova.</p>
-    <form data-form="forgot">${emailIn}${err}${msg}<button class="btn primary" ${dis}>${A.busy?"Invio…":"Mandami il link"}</button></form>
-    <div class="alt"><button class="btn ghost" data-act="authMode" data-m="login">Torna all'accesso</button></div>`;
-  else if(A.mode==="newpass")body=`<h3>Scegli una nuova password</h3>
-    <form data-form="newpass">${pwField("aPass","Nuova password, almeno 8 caratteri","new-password")}${err}<button class="btn primary" ${dis}>${A.busy?"Salvo…":"Salva la nuova password"}</button></form>`;
-  else body=`<h3>Accedi a LiftLog</h3><p class="small muted" style="margin:-6px 0 4px">Usa la stessa mail su PC e telefono per ritrovare ovunque i tuoi allenamenti.</p>
-    <form data-form="login">${emailIn}${pwField("aPass","Password","current-password")}${msg}${err}<button class="btn primary" ${dis}>${A.busy?"Accedo…":"Accedi"}</button></form>
-    <div class="alt"><button class="btn ghost" data-act="authMode" data-m="signup">Non hai un account? Registrati</button><button class="btn ghost" data-act="authMode" data-m="forgot">Password dimenticata?</button></div>`;
-  return `<section class="card auth">${body}</section>`;
-}
-async function authSubmit(kind){
-  const email=(document.getElementById("aEmail")||{}).value?.trim()||AUTH.email,pass=(document.getElementById("aPass")||{}).value||"";
-  AUTH.email=email;AUTH.err="";AUTH.msg="";AUTH.busy=true;render();
-  try{
-    if(kind==="login"){const {error}=await sb.auth.signInWithPassword({email,password:pass});if(error)throw error;return}
-    if(kind==="signup"){
-      const {data,error}=await sb.auth.signUp({email,password:pass,options:{emailRedirectTo:location.origin+"/"}});if(error)throw error;
-      if(data.user&&Array.isArray(data.user.identities)&&!data.user.identities.length)throw new Error("already registered");
-      if(!data.session)AUTH={...AUTH,mode:"check",msg:`Ti abbiamo mandato una mail a <b>${esc(email)}</b>. Apri il link per confermare l'account (se non la trovi, guarda nello spam), poi torna qui e accedi con mail e password.`};
-      return}
-    if(kind==="forgot"){const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+"/"});if(error)throw error;
-      AUTH.msg="Se esiste un account con questa mail, ti abbiamo mandato un link. Aprilo da questo dispositivo per scegliere la nuova password.";return}
-    if(kind==="newpass"){const {error}=await sb.auth.updateUser({password:pass});if(error)throw error;
-      AUTH.mode="login";const {data}=await sb.auth.getSession();toast("Password aggiornata");if(data.session){CLOUD.user=null;await setUser(data.session.user)}return}
-  }catch(e){AUTH.err=AUTH_ERR(e)}
-  finally{AUTH.busy=false;render()}
-}
-async function boot(){
-  loadLocal();S.ready=true;
-  if(sb){
-    S.mode="cloud";if(RECOVERY)AUTH.mode="newpass";
-    sb.auth.onAuthStateChange((ev,session)=>{setTimeout(()=>{
-      if(ev==="PASSWORD_RECOVERY"){CLOUD.user=null;AUTH={mode:"newpass",msg:"",err:"",email:"",busy:false};render();return}
-      if(AUTH.mode==="newpass")return;
-      if(session&&session.user)setUser(session.user);
-      else if(ev==="SIGNED_OUT"&&CLOUD.user)setUser(null);
-    },0)});
-    let session=null;try{({data:{session}}=await sb.auth.getSession())}catch(e){}
-    if(session&&session.user&&AUTH.mode!=="newpass")await setUser(session.user);else render();
-    window.addEventListener("online",()=>scheduleSync(0));
-    window.addEventListener("offline",()=>setStatus("offline"));
-    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")scheduleSync(0)});
-  }else render();
-  try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
-}
-function toast(msg){const m=document.getElementById("saveMode");m.textContent=msg;clearTimeout(toast.t);toast.t=setTimeout(()=>{toast.t=null;updateMode()},2500)}
-function updateMode(){
-  const t=!sb?"Salvato su questo dispositivo":!CLOUD.user?"":{ok:"Sincronizzato",sync:"Sincronizzo…",offline:"Offline: sincronizzo appena torna la rete",err:"Sincronizzazione non riuscita, riprovo"}[CLOUD.status];
-  document.getElementById("saveMode").textContent=t;
-}
+function toast(msg){const m=document.getElementById("saveMode");m.textContent=msg;clearTimeout(toast.t);toast.t=setTimeout(updateMode,2500)}
+function updateMode(){document.getElementById("saveMode").textContent="Salvato su questo dispositivo"}
 
 /* ---------- Calcoli ---------- */
 const exInfo=name=>LIB[name]||S.custom[name]||{t:"free",p:[],s:[]};
@@ -614,9 +454,6 @@ const app=document.getElementById("app");
 function render(){
   if(!S.ready)return;
   updateMode();
-  const needAuth=!!sb&&!CLOUD.user;
-  document.querySelector("nav.tabs").hidden=needAuth;
-  if(needAuth){app.innerHTML=viewAuth();return}
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===TAB));
   app.innerHTML=TAB==="log"?viewLog():TAB==="plans"?viewPlans():TAB==="progress"?viewProgress():TAB==="weight"?viewWeight():viewReport();
 }
@@ -665,7 +502,7 @@ function viewLog(){
           <button class="x" title="Rimuovi serie" aria-label="Rimuovi serie ${si+1}" data-act="delSet" data-ei="${ei}" data-si="${si}">×</button>`).join("")}</div>
         <button class="btn ghost" data-act="addSet" data-ei="${ei}">+ Aggiungi serie</button>`;
     return `<div class="ex"><div class="exhead"><div><span class="name">${esc(e.name)}</span><span class="tag">${TYPES[info.t]}</span>
-      <div class="small muted">${esc(info.p.join(", "))}${lastTxt?" · "+esc(lastTxt):""}</div></div>
+      <div class="small muted">${esc(info.p.join(", "))}${lastTxt?" · "+esc(lastTxt):""}</div>${e.plan?`<div class="goal"><b>Obiettivo:</b> ${esc(itemTxt({name:e.name,...e.plan}))}${e.plan.note?`<div class="small muted">${esc(e.plan.note)}</div>`:""}</div>`:""}</div>
       <button class="btn ghost danger" data-act="delEx" data-ei="${ei}">Rimuovi</button></div>
       ${last&&last.e.note?`<div class="lastnote"><b>Nota dell'ultima volta</b>${esc(last.e.note)}</div>`:""}${body}
       <input type="text" class="exnote" maxlength="300" data-ei="${ei}" data-k="note" aria-label="Nota su ${esc(e.name)} in questo allenamento" placeholder="Nota, es. potevo già aggiungere 5 kg" value="${esc(e.note??"")}"></div>`;
@@ -678,6 +515,7 @@ function viewLog(){
   return heroWeek()+`
   <section class="card">
     <h3>${draft.id?"Modifica allenamento":"Registra un allenamento"}${draft.tpl?` <span class="tag">${esc(draft.tpl)}</span>`:""}</h3>
+    ${draft.tplNote&&!draft.id?`<p class="small muted tplnote" style="margin:-6px 0 10px">${esc(draft.tplNote)}</p>`:""}
     <div class="row"><label class="f" style="max-width:200px">Data<input type="date" id="dDate" value="${draft.date}" max="${today()}"></label></div>
     <div style="margin-top:8px">${exHtml||(S.templates.length
       ?`<div class="empty" style="margin-top:12px;text-align:left"><b style="color:var(--ink)">Parti da una scheda</b><div class="quick">${S.templates.map(t=>`<button class="btn" data-act="tplUse" data-id="${esc(t.id)}">${esc(t.name)}</button>`).join("")}</div><p class="small" style="margin:12px 0 0">Oppure scegli il primo esercizio qui sotto.</p></div>`
@@ -695,11 +533,8 @@ function viewLog(){
     </div>
   </section>
   <section class="card"><h3>Ultimi allenamenti</h3>${hist?`<ul class="hist">${hist}</ul>`:`<div class="empty">Qui comparirà lo storico dei tuoi allenamenti.</div>`}</section>
-  ${CLOUD.user?`<section class="card"><h3>Account</h3>
-    <p class="small muted" style="margin-top:-6px">Sei connesso come <b style="color:var(--ink)">${esc(CLOUD.user.email||"")}</b>. I tuoi allenamenti sono salvati online e li ritrovi su ogni dispositivo in cui accedi con questa mail.</p>
-    <div class="row"><button class="btn" data-act="logout">Esci</button></div></section>`:""}
   <section class="card"><h3>Backup dei dati</h3>
-    <p class="small muted" style="margin-top:-6px">${CLOUD.user?"Una copia in più non fa mai male: puoi scaricare tutti i tuoi dati in un file.":"I dati restano solo su questo telefono. Scarica un backup ogni tanto: ti serve per non perderli se cambi telefono o cancelli i dati del browser."}</p>
+    <p class="small muted" style="margin-top:-6px">I dati restano solo su questo telefono. Scarica un backup ogni tanto: ti serve per non perderli se cambi telefono o cancelli i dati del browser.</p>
     <div class="row"><button class="btn" data-act="export">Scarica backup</button>
     <label class="btn" style="display:inline-flex;align-items:center">Ripristina da backup<input type="file" accept="application/json,.json" id="importFile" hidden></label></div>
   </section>`;
@@ -766,23 +601,6 @@ function periodRange(){
   const f=new Date(a.getFullYear(),a.getMonth(),1),l=new Date(a.getFullYear(),a.getMonth()+1,0);
   return [fmt(f),fmt(l),`${MESI[a.getMonth()][0].toUpperCase()+MESI[a.getMonth()].slice(1)} ${a.getFullYear()}`];
 }
-function reportOptions(from){
-  const first=S.workouts.reduce((a,w)=>w.date<a?w.date:a,today());
-  const opts=[];
-  if(RP.mode==="week"){
-    for(let m=monday(today()),i=0;m>=monday(first)&&i<104;m=addDays(m,-7),i++){
-      const e=addDays(m,6),n=new Set(S.workouts.filter(w=>w.date>=m&&w.date<=e).map(w=>w.date)).size;
-      const cur=m===monday(today());
-      const dm=parse(m),de=parse(e),lab=dm.getMonth()===de.getMonth()?`${dm.getDate()}–${nice(e)}`:`${nice(m)} – ${nice(e)}`;
-      opts.push(`<option value="${m}" ${m===from?"selected":""}>${cur?"Questa settimana":lab} (${n})</option>`)}
-  }else{
-    const t=parse(today()),f=parse(first);
-    for(let d=new Date(t.getFullYear(),t.getMonth(),1),i=0;d>=new Date(f.getFullYear(),f.getMonth(),1)&&i<36;d=new Date(d.getFullYear(),d.getMonth()-1,1),i++){
-      const a=fmt(d),z=fmt(new Date(d.getFullYear(),d.getMonth()+1,0)),n=new Set(S.workouts.filter(w=>w.date>=a&&w.date<=z).map(w=>w.date)).size;
-      opts.push(`<option value="${a}" ${a===from?"selected":""}>${MESI[d.getMonth()][0].toUpperCase()+MESI[d.getMonth()].slice(1)} ${d.getFullYear()} (${n})</option>`)}
-  }
-  return opts.join("");
-}
 function viewReport(){
   const [from,to,title]=periodRange();
   const st=periodStats(from,to),weeks=Math.max(1,(dayDiff(from,to)+1)/7);
@@ -800,10 +618,9 @@ function viewReport(){
   const key=`${RP.mode}|${from}`;
   if(AI.key!==key){AI={text:"",busy:false,key}}
   return `<div class="row" style="margin-top:20px;justify-content:space-between">
-      <div class="seg2 rptabs" role="group" aria-label="Tipo di report"><button data-act="rpMode" data-v="week" aria-pressed="${RP.mode==="week"}">Report settimanale</button><button data-act="rpMode" data-v="month" aria-pressed="${RP.mode==="month"}">Report mensile</button></div>
+      <div class="seg2" role="group" aria-label="Periodo del report"><button data-act="rpMode" data-v="week" aria-pressed="${RP.mode==="week"}">Settimana</button><button data-act="rpMode" data-v="month" aria-pressed="${RP.mode==="month"}">Mese</button></div>
     </div>
-    <div class="period"><button class="btn" data-act="rpPrev" aria-label="${RP.mode==="week"?"Settimana precedente":"Mese precedente"}">‹</button>
-      <label class="pick"><select id="rpPick" aria-label="${RP.mode==="week"?"Scegli la settimana da valutare":"Scegli il mese da valutare"}">${reportOptions(from)}</select><small>${RP.mode==="week"?"Scegli la settimana":"Scegli il mese"}, tra parentesi i giorni di allenamento</small></label><button class="btn" data-act="rpNext" aria-label="${RP.mode==="week"?"Settimana successiva":"Mese successivo"}" ${addDays(to,1)>today()?"disabled":""}>›</button></div>
+    <div class="period"><button class="btn" data-act="rpPrev" aria-label="Periodo precedente">‹</button><h2>${title}</h2><button class="btn" data-act="rpNext" aria-label="Periodo successivo" ${addDays(to,1)>today()?"disabled":""}>›</button></div>
     ${isFuture?"":`<div class="stats">
       <div><b>${st.days.length}</b><span>Giorni di allenamento${RP.mode==="month"?` · ${r1(st.days.length/weeks)} a settimana`:""}</span></div>
       <div><b>${st.totSets}</b><span>Serie con i pesi</span></div>
@@ -880,25 +697,18 @@ app.addEventListener("change",e=>{
   const t=e.target;
   if(t.id==="dDate"){draft.date=t.value||today();render()}
   if(t.id==="progPick"){progEx=t.value;render()}
-  if(t.id==="rpPick"){RP.anchor=t.value;render();showAI()}
+  if(t.id==="tplImport"&&t.files.length){importTemplates([...t.files]).catch(()=>toast("Importazione non riuscita"));t.value=""}
   if(t.id==="importFile"&&t.files[0]){
     const f=t.files[0];f.text().then(txt=>{
       const o=JSON.parse(txt);if(!o||!Array.isArray(o.workouts))throw 0;
       if(!confirm(`Il backup contiene ${o.workouts.length} allenamenti e ${(o.weights||[]).length} pesi. Sostituire i dati attuali?`))return;
-      const keep=new Set(o.workouts.map(x=>x.id)),keepP=new Set((o.weights||[]).map(x=>x.id));
-      S.workouts.forEach(x=>{if(!keep.has(x.id))bury("w:",x.id)});S.weights.forEach(x=>{if(!keepP.has(x.id))bury("p:",x.id)});
-      if(o.templates){const keepT=new Set(o.templates.map(x=>x.id));S.templates.forEach(x=>{if(!keepT.has(x.id))bury("t:",x.id)});S.templates=o.templates.map(stamp)}
-      S.workouts=o.workouts.map(stamp);S.weights=(o.weights||[]).map(stamp);S.custom=o.custom||{};saveLocal();render();toast("Backup ripristinato");
+      S.workouts=o.workouts;S.weights=o.weights||[];S.custom=o.custom||{};if(o.templates)S.templates=o.templates;saveLocal();render();toast("Backup ripristinato");
     }).catch(()=>toast("File di backup non valido"));
   }
 });
-app.addEventListener("submit",e=>{const f=e.target.closest("form[data-form]");if(!f)return;e.preventDefault();if(!AUTH.busy)authSubmit(f.dataset.form)});
 app.addEventListener("click",async e=>{
   const b=e.target.closest("[data-act]");if(!b)return;
   const a=b.dataset.act,ei=+b.dataset.ei;
-  if(a==="authMode"){const em=document.getElementById("aEmail");if(em)AUTH.email=em.value.trim();AUTH.mode=b.dataset.m;AUTH.err="";AUTH.msg="";render();const f=document.getElementById(AUTH.email?"aPass":"aEmail");if(f)f.focus();return}
-  if(a==="pwToggle"){const i=document.getElementById(b.dataset.for);if(i){const show=i.type==="password";i.type=show?"text":"password";b.textContent=show?"Nascondi":"Mostra"}return}
-  if(a==="logout"){logout();return}
   if(a==="addEx"){const n=document.getElementById("exPick").value;const info=exInfo(n);
     const last=lastSetsFor(n,draft.date);
     draft.exercises.push(info.t==="cardio"?{name:n,minutes:"",sets:[]}:{name:n,sets:last?last.e.sets.map(s=>({kg:s.kg,reps:s.reps})):[{kg:"",reps:""},{kg:"",reps:""},{kg:"",reps:""}]});
@@ -917,14 +727,16 @@ app.addEventListener("click",async e=>{
     const name=editTpl.name.trim().slice(0,40);
     if(!name){toast("Dai un nome alla scheda");document.getElementById("tplName").focus();return}
     if(!editTpl.items.length){toast("Aggiungi almeno un esercizio");return}
-    const t={id:editTpl.id||uid(),name,items:editTpl.items.map(i=>({name:i.name,sets:exInfo(i.name).t==="cardio"?0:clampSets(i.sets)}))};
-    stamp(t);const k=S.templates.findIndex(x=>x.id===t.id);if(k>=0)S.templates[k]=t;else S.templates.push(t);
+    const t={id:editTpl.id||uid(),name,items:editTpl.items.map(i=>({...i,name:i.name,sets:exInfo(i.name).t==="cardio"?0:clampSets(i.sets)}))};
+    if(editTpl.note)t.note=editTpl.note;
+    const k=S.templates.findIndex(x=>x.id===t.id);if(k>=0)S.templates[k]=t;else S.templates.push(t);
     saveLocal();editTpl=null;render();toast("Scheda salvata")}
-  if(a==="tplRemove"){if(confirm(`Eliminare la scheda "${editTpl.name}"? Gli allenamenti già registrati restano.`)){S.templates=S.templates.filter(x=>x.id!==editTpl.id);bury("t:",editTpl.id);saveLocal();editTpl=null;render();toast("Scheda eliminata")}}
+  if(a==="tplRemove"){if(confirm(`Eliminare la scheda "${editTpl.name}"? Gli allenamenti già registrati restano.`)){S.templates=S.templates.filter(x=>x.id!==editTpl.id);saveLocal();editTpl=null;render();toast("Scheda eliminata")}}
   if(a==="tplUse"){const t=S.templates.find(x=>x.id===b.dataset.id);if(!t)return;
     if(draft.exercises.length&&!confirm("Nell'allenamento ci sono già degli esercizi. Sostituirli con quelli della scheda?"))return;
     draft=loadTemplate(t);TAB="log";render();window.scrollTo(0,0);toast(`Scheda ${t.name} caricata`)}
-  if(a==="tplFromDraft"){editTpl={id:null,name:draft.tpl||"",items:draft.exercises.map(e=>({name:e.name,sets:e.sets.length||0}))};TAB="plans";render();window.scrollTo(0,0);document.getElementById("tplName").focus()}
+  if(a==="tplFromDraft"){editTpl={id:null,name:draft.tpl||"",items:draft.exercises.map(e=>({name:e.name,sets:e.sets.length||0,...(e.plan?{reps:e.plan.reps,rest:e.plan.rest,note:e.plan.note}:{})}))};if(draft.tplNote)editTpl.note=draft.tplNote;TAB="plans";render();window.scrollTo(0,0);document.getElementById("tplName").focus()}
+  if(a==="tplExport"){const t=S.templates.find(x=>x.id===b.dataset.id);if(t)exportTemplate(t)}
   if(a==="sumOpen"){const w=S.workouts.find(x=>x.id===b.dataset.id);if(w)openSummary(w)}
   if(a==="cancelEdit"){draft=newDraft();render()}
   if(a==="saveW"){
@@ -960,46 +772,27 @@ app.addEventListener("click",async e=>{
   }
 });
 
-/* ---------- Tema ---------- */
-function getTheme(){try{const t=localStorage.getItem("liftlog-theme");return t==="light"||t==="dark"?t:"auto"}catch(e){return "auto"}}
-function setTheme(t){
-  const r=document.documentElement;
-  if(t==="auto")delete r.dataset.theme;else r.dataset.theme=t;
-  try{if(t==="auto")localStorage.removeItem("liftlog-theme");else localStorage.setItem("liftlog-theme",t)}catch(e){}
-  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{m.content=t==="dark"?"#0E1A16":t==="light"?"#F6F5EE":(m.media.includes("dark")?"#0E1A16":"#F6F5EE")});
-  updateThemeBtn();
-}
-const darkMQ=matchMedia("(prefers-color-scheme: dark)");
-const isDark=()=>{const t=getTheme();return t==="auto"?darkMQ.matches:t==="dark"};
-const ICON_MOON=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>`;
-const ICON_SUN=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>`;
-function updateThemeBtn(){
-  const b=document.getElementById("themeBtn"),d=isDark();
-  b.innerHTML=d?ICON_SUN:ICON_MOON;
-  b.setAttribute("aria-label",d?"Passa alla modalità chiara":"Passa alla modalità scura");b.title=b.getAttribute("aria-label");
-}
-document.getElementById("themeBtn").addEventListener("click",()=>setTheme(isDark()?"light":"dark"));
-darkMQ.addEventListener("change",()=>{if(getTheme()==="auto")updateThemeBtn()});
-updateThemeBtn();
-
 /* ---------- Schede ---------- */
 const clampSets=v=>Math.max(1,Math.min(10,Math.round(num(v))||3));
 const tplSets=t=>t.items.reduce((a,i)=>a+(num(i.sets)||0),0);
 function tplMuscles(items){const ms=[];items.forEach(i=>exInfo(i.name).p.forEach(m=>{if(!ms.includes(m))ms.push(m)}));return ms}
+const itemTxt=i=>exInfo(i.name).t==="cardio"?`${i.reps?i.reps+" · ":""}cardio`:`${num(i.sets)} serie${i.reps?" × "+i.reps:""}${i.rest?" · rec. "+i.rest:""}`;
 function viewPlans(){
   if(editTpl)return viewTplEditor();
   const list=S.templates.map(t=>`<div class="tpl"><h4>${esc(t.name)}</h4>
     <div class="small muted">${t.items.length} esercizi · ${tplSets(t)} serie · ${esc(tplMuscles(t.items).join(", "))}</div>
-    <ol class="tplex">${t.items.map(i=>`<li>${esc(i.name)}<span class="muted">${exInfo(i.name).t==="cardio"?"cardio":num(i.sets)+" serie"}</span></li>`).join("")}</ol>
-    <div class="row"><button class="btn primary" data-act="tplUse" data-id="${esc(t.id)}">Inizia questa scheda</button><button class="btn" data-act="tplEdit" data-id="${esc(t.id)}">Modifica</button></div></div>`).join("");
-  return `<section class="card"><div class="exhead"><h3 style="margin:0">Le tue schede</h3><button class="btn" data-act="tplNew">Nuova scheda</button></div>
-    <p class="small muted" style="margin:0 0 4px">Prepari gli esercizi una volta sola. Quando inizi una scheda li ritrovi nell'allenamento con i pesi dell'ultima volta, e per quel giorno puoi cambiarli come vuoi.</p>
-    ${list||`<div class="empty" style="margin-top:12px">Non hai ancora schede. Creane una, per esempio "Push" o "Gambe".</div>`}</section>`;
+    ${t.note?`<p class="small tplnote">${esc(t.note)}</p>`:""}
+    <ol class="tplex">${t.items.map(i=>`<li>${esc(i.name)}<span class="muted">${esc(itemTxt(i))}</span>${i.note?`<div class="small muted">${esc(i.note)}</div>`:""}</li>`).join("")}</ol>
+    <div class="row"><button class="btn primary" data-act="tplUse" data-id="${esc(t.id)}">Inizia questa scheda</button><button class="btn" data-act="tplEdit" data-id="${esc(t.id)}">Modifica</button><button class="btn ghost" data-act="tplExport" data-id="${esc(t.id)}">Esporta</button></div></div>`).join("");
+  return `<section class="card"><div class="exhead"><h3 style="margin:0">Le tue schede</h3>
+      <div class="row hacts"><label class="btn" style="display:inline-flex;align-items:center">Importa<input type="file" accept="application/json,.json" id="tplImport" multiple hidden></label><button class="btn" data-act="tplNew">Nuova scheda</button></div></div>
+    <p class="small muted" style="margin:0 0 4px">Prepari gli esercizi una volta sola. Quando inizi una scheda li ritrovi nell'allenamento con i pesi dell'ultima volta, e per quel giorno puoi cambiarli come vuoi. Con "Importa" carichi una o più schede da file (.json).</p>
+    ${list||`<div class="empty" style="margin-top:12px">Non hai ancora schede. Creane una, per esempio "Push" o "Gambe", oppure importala da un file.</div>`}</section>`;
 }
 function viewTplEditor(){
   const t=editTpl;
   const rows=t.items.map((it,ti)=>{const info=exInfo(it.name),c=info.t==="cardio";
-    return `<div class="tplrow"><div><b>${esc(it.name)}</b><div class="small muted">${esc(info.p.join(", "))}</div></div>
+    return `<div class="tplrow"><div><b>${esc(it.name)}</b><div class="small muted">${esc(info.p.join(", "))}</div>${it.reps||it.rest?`<div class="small muted">Obiettivo: ${esc(itemTxt(it))}</div>`:""}</div>
       ${c?`<span class="small muted">Cardio</span>`:`<label class="f">Serie<input type="number" inputmode="numeric" min="1" max="10" data-ti="${ti}" data-tk="sets" value="${esc(it.sets)}"></label>`}
       <div class="ord"><button class="x" data-act="tplUp" data-ti="${ti}" aria-label="Sposta su ${esc(it.name)}" ${ti===0?"disabled":""}>↑</button><button class="x" data-act="tplDown" data-ti="${ti}" aria-label="Sposta giù ${esc(it.name)}" ${ti===t.items.length-1?"disabled":""}>↓</button><button class="x" data-act="tplDelItem" data-ti="${ti}" aria-label="Togli ${esc(it.name)}">×</button></div></div>`}).join("");
   return `<section class="card"><h3>${t.id?"Modifica scheda":"Nuova scheda"}</h3>
@@ -1011,12 +804,62 @@ function viewTplEditor(){
       <div class="row"><button class="btn ghost" data-act="tplCancel">Annulla</button><button class="btn primary" data-act="tplSave">Salva scheda</button></div></div></section>`;
 }
 function loadTemplate(t){
-  const d=newDraft();d.tpl=t.name;
+  const d=newDraft();d.tpl=t.name;if(t.note)d.tplNote=t.note;
   d.exercises=t.items.map(it=>{const info=exInfo(it.name);
-    if(info.t==="cardio")return {name:it.name,minutes:"",sets:[]};
-    const last=lastSetsFor(it.name,d.date),src=last?last.e.sets:[];
-    return {name:it.name,sets:Array.from({length:clampSets(it.sets)},(_,i)=>{const s=src[Math.min(i,src.length-1)];return s?{kg:s.kg,reps:s.reps}:{kg:"",reps:""}})}});
+    const plan=it.reps||it.rest||it.note?{sets:info.t==="cardio"?0:clampSets(it.sets),reps:it.reps||"",rest:it.rest||"",note:it.note||""}:null;
+    const ex=info.t==="cardio"?{name:it.name,minutes:"",sets:[]}:(()=>{const last=lastSetsFor(it.name,d.date),src=last?last.e.sets:[];
+      return {name:it.name,sets:Array.from({length:clampSets(it.sets)},(_,i)=>{const s=src[Math.min(i,src.length-1)];return s?{kg:s.kg,reps:s.reps}:{kg:"",reps:""}})}})();
+    if(plan)ex.plan=plan;return ex});
   return d;
+}
+
+/* ---------- Importa / esporta schede ---------- */
+const hasMuscle=m=>Object.prototype.hasOwnProperty.call(MUSCLES,m);
+const txt=(v,n)=>String(v??"").trim().slice(0,n);
+function cleanItem(i){
+  const name=txt(i&&(i.name||i.esercizio),60);if(!name)return null;
+  const c=exInfo(name).t==="cardio",it={name,sets:c?0:clampSets(i.sets??i.serie)};
+  const reps=txt(i.reps??i.ripetizioni,30),rest=txt(i.rest??i.recupero,20),note=txt(i.note,200);
+  if(reps)it.reps=reps;if(rest)it.rest=rest;if(note)it.note=note;return it;
+}
+async function importTemplates(files){
+  let added=0,replaced=0,newEx=0,bad=0;const unknown=new Set();
+  for(const f of files){
+    let o;try{o=JSON.parse(await f.text())}catch(e){bad++;continue}
+    const list=Array.isArray(o)?o:Array.isArray(o&&o.schede)?o.schede:Array.isArray(o&&o.templates)?o.templates:(o&&Array.isArray(o.items)?[o]:null);
+    if(!list){bad++;continue}
+    // prima gli esercizi nuovi, così le schede li riconoscono
+    for(const [n,d] of Object.entries((o&&(o.esercizi||o.custom))||{})){
+      const name=txt(n,60);if(!name||LIB[name]||S.custom[name]||!d||typeof d!=="object")continue;
+      const t=TYPES[d.t]?d.t:"free",p=(Array.isArray(d.p)?d.p:[]).filter(hasMuscle),s=(Array.isArray(d.s)?d.s:[]).filter(m=>hasMuscle(m)&&!p.includes(m));
+      if(!p.length&&t!=="cardio")continue;
+      S.custom[name]={t,p:p.length?p:["Cardio"],s};newEx++;
+    }
+    for(const raw of list){
+      const name=txt(raw&&(raw.name||raw.nome),40);
+      const items=(Array.isArray(raw&&raw.items)?raw.items:Array.isArray(raw&&raw.esercizi)?raw.esercizi:[]).map(cleanItem).filter(Boolean);
+      if(!name||!items.length){bad++;continue}
+      items.forEach(i=>{if(!LIB[i.name]&&!S.custom[i.name])unknown.add(i.name)});
+      const t={id:uid(),name,items},note=txt(raw.note,600);if(note)t.note=note;
+      const k=S.templates.findIndex(x=>x.name.toLowerCase()===name.toLowerCase());
+      if(k>=0){if(!confirm(`La scheda "${name}" esiste già. Sostituirla con quella del file?`))continue;t.id=S.templates[k].id;S.templates[k]=t;replaced++}
+      else{S.templates.push(t);added++}
+    }
+  }
+  saveLocal();editTpl=null;TAB="plans";render();
+  const msg=[added&&`${added} ${added===1?"scheda importata":"schede importate"}`,replaced&&`${replaced} sostituite`,newEx&&`${newEx} esercizi nuovi`,bad&&`${bad} file non validi`].filter(Boolean).join(" · ");
+  toast(msg||"Nessuna scheda importata");
+  if(unknown.size)alert(`Questi esercizi non sono nella lista dell'app: ${[...unknown].join(", ")}.\nPuoi usarli lo stesso, ma per contarli nei report crea l'esercizio con lo stesso nome (Allenamento › Crea esercizio).`);
+}
+function downloadJSON(obj,filename){
+  const blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob),l=document.createElement("a");l.href=url;l.download=filename;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function exportTemplate(t){
+  const esercizi={};t.items.forEach(i=>{if(S.custom[i.name])esercizi[i.name]=S.custom[i.name]});
+  const slug=t.name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"scheda";
+  downloadJSON({app:"liftlog-scheda",version:1,schede:[{name:t.name,...(t.note?{note:t.note}:{}),items:t.items}],esercizi},`liftlog-scheda-${slug}.json`);
+  toast("Scheda esportata");
 }
 
 /* ---------- Riepilogo di fine allenamento ---------- */
