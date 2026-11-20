@@ -69,9 +69,10 @@ nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(-
 .week p{margin:4px 0 0;color:var(--muted)}
 .plates{display:flex;gap:6px;margin-top:16px}
 .plate{flex:1;max-width:84px;aspect-ratio:1;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;position:relative;font-family:"Barlow Condensed",sans-serif;font-weight:600;color:var(--muted);font-size:15px}
-.plate.on{border:0;color:var(--bg);background:var(--ink)}
-.plate.on::after{content:"";position:absolute;width:22%;aspect-ratio:1;border-radius:50%;background:var(--bg)}
-.plate.on span{position:absolute;bottom:12%}
+/* giorno allenato: fulmine giallo del logo sopra, lettera del giorno sotto */
+.plate.on{border:2px solid #F5E04A;background:#14332A;color:#F4F3EA;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 0 0 3px rgba(245,224,74,.22)}
+.plate.on .bolt{width:30%;max-width:24px;height:auto;flex:none;display:block;margin-bottom:1px}
+.plate.on span{line-height:1}
 .plate.today{outline:2px solid var(--ink);outline-offset:3px}
 .plate .seg{position:absolute;inset:0;border-radius:50%}
 .recov{margin:14px 0 0;font-size:14px;color:var(--muted)}
@@ -117,6 +118,7 @@ textarea{min-height:64px;resize:vertical}
 /* Charts */
 .chart{width:100%;overflow-x:auto}
 .chart svg{width:100%;height:auto;display:block;min-width:420px}
+.chart.fit svg{min-width:0}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:6px}
 
 /* Report */
@@ -190,6 +192,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 .sets.uni .hd.dx,.sets.uni .hd.sx{grid-column:span 2;font-weight:600;color:var(--ink);border-bottom:2px solid var(--line);padding-bottom:2px}
 .sets.uni input{padding:9px 6px}
 .unichk{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin-top:4px}
+.undobar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--surface2);border:1px solid var(--line);border-left:4px solid var(--accent-line);border-radius:8px;padding:8px 8px 8px 12px;margin:0 0 12px;font-size:14px}
 .chips label{border:1px solid var(--line);border-radius:99px;padding:5px 10px;font-size:14px;cursor:pointer;display:flex;gap:6px;align-items:center}
 @media (max-width:560px){
   .mbar{grid-template-columns:92px 1fr 52px}
@@ -458,14 +461,15 @@ function lineChart(series,opts={}){
   }
   return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.label||"Grafico")}">${g}</svg></div>`;
 }
-function barChart(items){
-  const W=640,H=200,L=30,R=10,T=14,B=30,max=Math.max(4,...items.map(i=>i.v));
+function barChart(items,o={}){
+  const lab=o.label||(it=>niceShort(it.x)),tip=o.tip||(it=>`Settimana del ${nice(it.x)}: ${it.v}`),every=o.every||2,fs=o.fit?20:12;
+  const W=640,H=o.fit?240:200,L=o.fit?36:30,R=10,T=14,B=o.fit?38:30,max=Math.max(4,...items.map(i=>i.v));
   const bw=(W-L-R)/items.length;let g="";
-  for(let v=0;v<=max;v+=Math.ceil(max/4)){const y=T+(H-T-B)*(1-v/max);g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="12" fill="var(--muted)">${v}</text>`}
+  for(let v=0;v<=max;v+=Math.ceil(max/4)){const y=T+(H-T-B)*(1-v/max);g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="${fs}" fill="var(--muted)">${v}</text>`}
   items.forEach((it,i)=>{const h=(H-T-B)*it.v/max,x=L+i*bw+bw*.18;
-    g+=`<rect x="${x}" y="${H-B-h}" width="${bw*.64}" height="${h}" rx="3" fill="${it.cur?"var(--pull)":"var(--ink)"}"><title>Settimana del ${nice(it.x)}: ${it.v}</title></rect>`;
-    if(i%2===0||i===items.length-1)g+=`<text x="${x+bw*.32}" y="${H-8}" text-anchor="middle" font-size="12" fill="var(--muted)">${niceShort(it.x)}</text>`});
-  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Allenamenti per settimana">${g}</svg></div>`;
+    g+=`<rect x="${x}" y="${H-B-h}" width="${bw*.64}" height="${h}" rx="3" fill="${it.cur?"var(--pull)":"var(--ink)"}"><title>${esc(tip(it))}</title></rect>`;
+    if(i%every===0||i===items.length-1)g+=`<text x="${x+bw*.32}" y="${H-8}" text-anchor="middle" font-size="${fs}" fill="var(--muted)">${esc(lab(it))}</text>`});
+  return `<div class="chart${o.fit?" fit":""}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.aria||"Allenamenti per settimana")}">${g}</svg></div>`;
 }
 
 /* ---------- UI ---------- */
@@ -473,8 +477,10 @@ let TAB="log";
 let draft=newDraft();
 let progEx=null;
 let editTpl=null;
+let undoTpl=null; // per "Annulla": allenamento di prima e scheda appena caricata
 let sumCur=null;
 let RP={mode:"week",anchor:today()};
+let FQ="week"; // frequenza in Progressi: "week" o "month"
 let AI={text:"",busy:false,key:""};
 function newDraft(){return {id:null,date:today(),exercises:[],note:""}}
 const app=document.getElementById("app");
@@ -486,11 +492,12 @@ function render(){
   app.innerHTML=TAB==="log"?viewLog():TAB==="plans"?viewPlans():TAB==="progress"?viewProgress():TAB==="weight"?viewWeight():viewReport();
 }
 
+const BOLT='<svg class="bolt" viewBox="83 81 34 52" aria-hidden="true"><path d="M93 82 L111 82 L103 100 L116 100 L88 132 L96 108 L84 108 Z" fill="#F5E04A"/></svg>';
 function heroWeek(){
   const mon=monday(today()),days=new Set(S.workouts.map(w=>w.date));
   let n=0,pl="";
   for(let i=0;i<7;i++){const d=addDays(mon,i),on=days.has(d);if(on)n++;
-    pl+=`<div class="plate ${on?"on":""} ${d===today()?"today":""}" title="${nice(d)}">${on?`<span>${GG[i]}</span>`:GG[i]}</div>`}
+    pl+=`<div class="plate ${on?"on":""} ${d===today()?"today":""}" title="${nice(d)}${on?": allenamento registrato":""}">${on?`${BOLT}<span>${GG[i]}</span>`:GG[i]}</div>`}
   // recupero
   const recent={};
   for(const w of S.workouts){const age=dayDiff(w.date,today());if(age<0||age>2)continue;
@@ -553,6 +560,7 @@ function viewLog(){
   return heroWeek()+`
   <section class="card">
     <h3>${draft.id?"Modifica allenamento":"Registra un allenamento"}${draft.tpl?` <span class="tag">${esc(draft.tpl)}</span>`:""}</h3>
+    ${draft.tpl&&!draft.id?`<div class="undobar"><span>Hai aperto la scheda <b>${esc(draft.tpl)}</b>.</span><button class="btn" data-act="tplUndo">Annulla scheda</button></div>`:""}
     ${draft.tplNote&&!draft.id?`<p class="small muted tplnote" style="margin:-6px 0 10px">${esc(draft.tplNote)}</p>`:""}
     <div class="row"><label class="f" style="max-width:200px">Data<input type="date" id="dDate" value="${draft.date}" max="${today()}"></label></div>
     <div style="margin-top:8px">${exHtml||(S.templates.length
@@ -567,6 +575,7 @@ function viewLog(){
     <div class="row" style="margin-top:14px;justify-content:flex-end">
       ${draft.exercises.length?`<button class="btn ghost" data-act="tplFromDraft">Salva come scheda</button>`:""}
       ${draft.id?`<button class="btn ghost" data-act="cancelEdit">Annulla modifica</button>`:""}
+      ${draft.tpl&&!draft.id?`<button class="btn ghost" data-act="tplUndo">Annulla scheda</button>`:""}
       <button class="btn primary" data-act="saveW" ${draft.exercises.length?"":"disabled"}>${draft.id?"Salva modifiche":"Salva allenamento"}</button>
     </div>
   </section>
@@ -580,11 +589,28 @@ function viewLog(){
 
 function viewProgress(){
   const used=[...new Set(sortedW().flatMap(w=>w.exercises.map(e=>e.name)))].filter(n=>exInfo(n).t!=="cardio");
-  // frequenza ultime 12 settimane
-  const mon=monday(today()),bars=[];
-  for(let i=11;i>=0;i--){const m=addDays(mon,-7*i),e=addDays(m,6);bars.push({x:m,v:new Set(S.workouts.filter(w=>w.date>=m&&w.date<=e).map(w=>w.date)).size,cur:i===0})}
-  const avg=r1(bars.reduce((a,b)=>a+b.v,0)/12);
-  let freq=`<section class="card"><h3>Frequenza settimanale</h3><p class="muted small" style="margin-top:-6px">Giorni di allenamento nelle ultime 12 settimane · media ${avg} a settimana</p>${barChart(bars)}</section>`;
+  // frequenza: ultime 12 settimane oppure ultimi 12 mesi
+  const daysIn=(a,b)=>new Set(S.workouts.filter(w=>w.date>=a&&w.date<=b).map(w=>w.date)).size;
+  const bars=[];let sub,chart;
+  if(FQ==="month"){
+    const now=parse(today());
+    for(let i=11;i>=0;i--){const f=new Date(now.getFullYear(),now.getMonth()-i,1),l=new Date(f.getFullYear(),f.getMonth()+1,0);
+      bars.push({x:fmt(f),v:daysIn(fmt(f),fmt(l)),cur:i===0,m:f.getMonth(),y:f.getFullYear()})}
+    const done=bars.filter(b=>!b.cur),avgM=done.length?r1(done.reduce((a,b)=>a+b.v,0)/done.length):0;
+    const first=bars.findIndex(b=>b.v>0),active=first<0?[]:bars.slice(first).filter(b=>!b.cur);
+    const avgA=active.length?r1(active.reduce((a,b)=>a+b.v,0)/active.length):null;
+    sub=`Giorni di allenamento negli ultimi 12 mesi · questo mese ${bars[11].v}${avgA!==null?` · media ${avgA} al mese (circa ${r1(avgA/4.35)} a settimana)`:""}`;
+    chart=barChart(bars,{fit:true,every:matchMedia("(max-width:560px)").matches?2:1,aria:"Allenamenti per mese",label:b=>MESI[b.m].slice(0,3)+(b.m===0?" "+String(b.y).slice(2):""),tip:b=>`${MESI[b.m][0].toUpperCase()+MESI[b.m].slice(1)} ${b.y}: ${b.v} ${b.v===1?"giorno":"giorni"}`});
+  }else{
+    const mon=monday(today());
+    for(let i=11;i>=0;i--){const m=addDays(mon,-7*i),e=addDays(m,6);bars.push({x:m,v:daysIn(m,e),cur:i===0})}
+    const avg=r1(bars.reduce((a,b)=>a+b.v,0)/12);
+    sub=`Giorni di allenamento nelle ultime 12 settimane · media ${avg} a settimana`;
+    chart=barChart(bars,{fit:true,every:matchMedia("(max-width:560px)").matches?3:2});
+  }
+  let freq=`<section class="card"><div class="exhead" style="flex-wrap:wrap;margin-bottom:10px"><h3 style="margin:0">Frequenza ${FQ==="month"?"mensile":"settimanale"}</h3>
+    <div class="seg2" role="group" aria-label="Periodo della frequenza"><button data-act="fqMode" data-v="week" aria-pressed="${FQ!=="month"}">Settimana</button><button data-act="fqMode" data-v="month" aria-pressed="${FQ==="month"}">Mese</button></div></div>
+    <p class="muted small" style="margin:0 0 4px">${sub}</p>${chart}<p class="small muted" style="margin:4px 0 0">In blu ${FQ==="month"?"il mese":"la settimana"} in corso.</p></section>`;
   if(!used.length)return freq+`<section class="card"><h3>Progressi sugli esercizi</h3><div class="empty">Registra qualche allenamento con i pesi per vedere come crescono i carichi.</div></section>`;
   if(!progEx||!used.includes(progEx))progEx=used[0];
   const rows=[],max=[],est=[];
@@ -776,7 +802,11 @@ app.addEventListener("click",async e=>{
   if(a==="tplRemove"){if(confirm(`Eliminare la scheda "${editTpl.name}"? Gli allenamenti già registrati restano.`)){S.templates=S.templates.filter(x=>x.id!==editTpl.id);saveLocal();editTpl=null;render();toast("Scheda eliminata")}}
   if(a==="tplUse"){const t=S.templates.find(x=>x.id===b.dataset.id);if(!t)return;
     if(draft.exercises.length&&!confirm("Nell'allenamento ci sono già degli esercizi. Sostituirli con quelli della scheda?"))return;
-    draft=loadTemplate(t);TAB="log";render();window.scrollTo(0,0);toast(`Scheda ${t.name} caricata`)}
+    const before=JSON.parse(JSON.stringify(draft));
+    draft=loadTemplate(t);undoTpl={before,from:TAB,snap:JSON.stringify(draft.exercises)};TAB="log";render();window.scrollTo(0,0);toast(`Scheda ${t.name} caricata`)}
+  if(a==="tplUndo"){
+    if(undoTpl&&JSON.stringify(draft.exercises)!==undoTpl.snap&&!confirm("Hai già inserito dei dati in questa scheda. Annullarla lo stesso? Quello che hai scritto andrà perso."))return;
+    const u=undoTpl;draft=u?u.before:newDraft();undoTpl=null;TAB=u&&u.from==="plans"?"plans":"log";render();window.scrollTo(0,0);toast("Scheda annullata")}
   if(a==="tplFromDraft"){editTpl={id:null,name:draft.tpl||"",items:draft.exercises.map(e=>({name:e.name,sets:e.sets.length||0,...(e.uni?{uni:true}:{}),...(e.plan?{reps:e.plan.reps,rest:e.plan.rest,note:e.plan.note}:{})}))};if(draft.tplNote)editTpl.note=draft.tplNote;TAB="plans";render();window.scrollTo(0,0);document.getElementById("tplName").focus()}
   if(a==="tplExport"){const t=S.templates.find(x=>x.id===b.dataset.id);if(t)exportTemplate(t)}
   if(a==="sumOpen"){const w=S.workouts.find(x=>x.id===b.dataset.id);if(w)openSummary(w)}
@@ -789,7 +819,7 @@ app.addEventListener("click",async e=>{
     if(!w.exercises.length){toast("Inserisci almeno una serie con le ripetizioni");return}
     if(draft.tpl)w.tpl=draft.tpl;
     b.disabled=true;
-    try{await putWorkout(w);draft=newDraft();render();toast("Allenamento salvato");openSummary(w)}catch(err){b.disabled=false;toast("Salvataggio non riuscito, riprova")}
+    try{await putWorkout(w);draft=newDraft();undoTpl=null;render();toast("Allenamento salvato");openSummary(w)}catch(err){b.disabled=false;toast("Salvataggio non riuscito, riprova")}
   }
   if(a==="editW"){const w=S.workouts.find(x=>x.id===b.dataset.id);if(w){draft=JSON.parse(JSON.stringify(w));draft.note=draft.note||"";render();window.scrollTo(0,document.querySelector("section.card").offsetTop-90)}}
   if(a==="delW"){if(confirm("Eliminare questo allenamento?")){try{await delWorkout(b.dataset.id);if(draft.id===b.dataset.id)draft=newDraft();render();toast("Allenamento eliminato")}catch(err){toast("Eliminazione non riuscita")}}}
@@ -802,6 +832,7 @@ app.addEventListener("click",async e=>{
   }
   if(a==="delP"){if(confirm("Eliminare questo valore?")){try{await delWeight(b.dataset.id);render()}catch(err){toast("Eliminazione non riuscita")}}}
   if(a==="rpMode"){RP.mode=b.dataset.v;render();showAI()}
+  if(a==="fqMode"){FQ=b.dataset.v;render()}
   if(a==="rpPrev"||a==="rpNext"){const dir=a==="rpPrev"?-1:1;
     if(RP.mode==="week")RP.anchor=addDays(RP.anchor,7*dir);
     else{const d=parse(RP.anchor);RP.anchor=fmt(new Date(d.getFullYear(),d.getMonth()+dir,1))}
