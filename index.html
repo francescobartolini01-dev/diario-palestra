@@ -253,6 +253,16 @@ button.plate.on:active,button.cell.on:active{transform:scale(.92)}
 /* account */
 .authform{display:grid;gap:10px;max-width:420px}
 .authmsg{margin:10px 0 0;padding:10px 12px;border-radius:8px;background:var(--surface2);border-left:4px solid var(--accent-line)}
+/* schermata di accesso */
+body.gated nav.tabs{display:none}
+.gate{max-width:420px;margin:48px auto 0;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px 24px;text-align:center;display:flex;flex-direction:column;gap:12px}
+.gate h2{font-size:34px;font-weight:700}
+.gate p{margin:0}
+.gatelogo{width:84px;height:84px;margin:0 auto}
+.gate .authform{max-width:none;text-align:left;margin-top:6px}
+.gate .authform .btn{width:100%;margin-top:4px}
+.gateswitch{margin-top:4px!important}
+.gateguest{font-size:13px}
 .chips label{border:1px solid var(--line);border-radius:99px;padding:5px 10px;font-size:14px;cursor:pointer;display:flex;gap:6px;align-items:center}
 
 /* ================= Splash di apertura ================= */
@@ -546,11 +556,13 @@ function authMessage(e){const m=String(e.message||"").toLowerCase(),c=String(e.c
   if(c==="email_not_confirmed"||m.includes("not confirmed"))return "Prima conferma l’email: apri il messaggio che ti ha mandato Supabase, poi accedi qui.";
   if(c==="user_already_exists"||m.includes("already registered"))return "Esiste già un account con questa email: usa Accedi.";
   if(c==="weak_password"||m.includes("password should"))return "Password troppo corta: usa almeno 6 caratteri.";
+  if(c==="over_email_send_rate_limit"||m.includes("rate limit"))return "Supabase ha raggiunto il limite di email di conferma per quest’ora. Spegni la conferma via email nelle impostazioni di Supabase, oppure riprova più tardi.";
+  if(c==="email_address_not_authorized"||m.includes("not authorized")||m.includes("sending confirmation")||m.includes("error sending"))return "Supabase non riesce a mandare l’email di conferma a questo indirizzo. Spegni la conferma via email nelle impostazioni di Supabase e riprova.";
   if(m.includes("failed to fetch")||m.includes("network"))return "Nessuna connessione. Riprova quando sei online.";
   return "Non è andata: "+e.message}
-async function signIn(email,password){const j=await sbReq("/auth/v1/token?grant_type=password",{method:"POST",auth:false,body:{email,password}});setAuth(sessionFrom(j));await syncNow(true)}
+async function signIn(email,password){const j=await sbReq("/auth/v1/token?grant_type=password",{method:"POST",auth:false,body:{email,password}});setAuth(sessionFrom(j));try{localStorage.removeItem(GUEST_KEY)}catch(e){}await syncNow(true)}
 async function signUp(email,password){const j=await sbReq("/auth/v1/signup",{method:"POST",auth:false,body:{email,password}});
-  const ses=sessionFrom(j);if(ses){setAuth(ses);await syncNow(true);return "ok"}return "confirm"}
+  const ses=sessionFrom(j);if(ses){setAuth(ses);try{localStorage.removeItem(GUEST_KEY)}catch(e){}await syncNow(true);return "ok"}return "confirm"}
 async function signOut(){try{if(AUTH)await sbReq("/auth/v1/logout",{method:"POST"})}catch(e){}setAuth(null);SYNC.state="idle";render()}
 function scheduleSync(){if(!SB||!AUTH)return;clearTimeout(SYNC.timer);SYNC.timer=setTimeout(()=>syncNow(),1500)}
 let pendingRender=false;
@@ -599,7 +611,7 @@ async function putCustom(){
 }
 function toast(msg){const m=document.getElementById("saveMode");m.textContent=msg;clearTimeout(toast.t);toast.t=setTimeout(updateMode,2500)}
 function updateMode(){const el=document.getElementById("saveMode");
-  if(!SB||!AUTH){el.textContent="Salvato su questo dispositivo";return}
+  if(!SB||!AUTH){el.textContent="";return}
   const hm=d=>`${pad(new Date(d).getHours())}:${pad(new Date(d).getMinutes())}`;
   el.textContent=SYNC.state==="syncing"?"Sincronizzo…":SYNC.state==="ok"?`Sincronizzato alle ${hm(SYNC.last)}`:SYNC.state==="offline"?"Offline: sincronizzo appena torna la rete":SYNC.state==="error"?"Sincronizzazione non riuscita":"Collegato"}
 
@@ -750,9 +762,30 @@ let AI={text:"",busy:false,key:""};
 function newDraft(){return {id:null,date:today(),exercises:[],note:""}}
 const app=document.getElementById("app");
 
+const GUEST_KEY="liftlog-guest";
+const isGuest=()=>{try{return localStorage.getItem(GUEST_KEY)==="1"}catch(e){return false}};
+function viewGate(){
+  return `<section class="gate"><img src="/logo.svg" alt="" class="gatelogo">
+    <h2>${GATE.mode==="signup"?"Crea il tuo account":"Accedi a LiftLog"}</h2>
+    <p class="small muted">${GATE.mode==="signup"?"Con un account ritrovi allenamenti, schede e progressi su telefono e PC.":"Entra con la tua email: ritrovi i tuoi allenamenti su ogni dispositivo."}</p>
+    <form id="authForm" class="authform" autocomplete="on">
+      <label class="f">Email<input type="email" id="authEmail" autocomplete="username" required value="${esc(GATE.email)}"></label>
+      <label class="f">Password<input type="password" id="authPw" autocomplete="${GATE.mode==="signup"?"new-password":"current-password"}" minlength="6" required></label>
+      ${GATE.mode==="signup"
+        ?`<button class="btn primary" type="button" data-act="signUp">Crea account</button>`
+        :`<button class="btn primary" type="submit">Accedi</button>`}
+    </form>
+    ${AUTHMSG?`<p class="small authmsg">${esc(AUTHMSG)}</p>`:""}
+    <p class="small gateswitch">${GATE.mode==="signup"?`Hai già un account? <button class="linkbtn" data-act="gateMode" data-v="login">Accedi</button>`:`Non hai un account? <button class="linkbtn" data-act="gateMode" data-v="signup">Creane uno</button>`}</p>
+    <p class="small muted gateguest"><button class="linkbtn" data-act="guest">Continua senza account</button>: i dati restano solo su questo dispositivo.</p>
+  </section>`;
+}
+let GATE={mode:"login",email:""};
 function render(){
   if(!S.ready)return;
   updateMode();
+  if(SB&&!AUTH&&!isGuest()){document.body.classList.add("gated");app.innerHTML=viewGate();return}
+  document.body.classList.remove("gated");
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===TAB));
   app.innerHTML=TAB==="log"?viewLog():TAB==="plans"?viewPlans():TAB==="progress"?viewProgress():TAB==="weight"?viewWeight():viewReport();
 }
@@ -869,7 +902,7 @@ function accountCard(){
   return `<section class="card acct"><h3>Usa LiftLog anche dal PC</h3>
     <p class="small" style="margin-top:-6px">Crea un account e accedi con la stessa email su telefono e PC: allenamenti, schede e peso si sincronizzano da soli. I dati che hai già su questo dispositivo non si perdono.</p>
     <form id="authForm" class="authform" autocomplete="on">
-      <label class="f">Email<input type="email" id="authEmail" autocomplete="username" required></label>
+      <label class="f">Email<input type="email" id="authEmail" autocomplete="username" required value="${esc(GATE.email)}"></label>
       <label class="f">Password<input type="password" id="authPw" autocomplete="current-password" minlength="6" required></label>
       <div class="row"><button class="btn primary" type="submit">Accedi</button><button class="btn" type="button" data-act="signUp">Crea account</button></div>
     </form>
@@ -1206,7 +1239,7 @@ app.addEventListener("change",e=>{
 });
 app.addEventListener("submit",async e=>{
   if(e.target.id!=="authForm")return;e.preventDefault();
-  const em=document.getElementById("authEmail").value.trim(),pw=document.getElementById("authPw").value;
+  const em=document.getElementById("authEmail").value.trim(),pw=document.getElementById("authPw").value;GATE.email=em;
   const btn=e.target.querySelector('[type="submit"]');btn.disabled=true;btn.textContent="Accesso…";
   try{await signIn(em,pw);AUTHMSG="";toast("Collegato: dati sincronizzati")}catch(err){AUTHMSG=authMessage(err)}
   render();
@@ -1266,10 +1299,12 @@ app.addEventListener("click",async e=>{
   if(a==="goWeight"){TAB="weight";render()}
   if(a==="goCal"){TAB="progress";render();window.scrollTo(0,0)}
   if(a==="syncNow"){syncNow(true)}
-  if(a==="signOut"){if(confirm("Uscire dall’account? I dati restano anche su questo dispositivo."))signOut()}
-  if(a==="signUp"){const em=document.getElementById("authEmail").value.trim(),pw=document.getElementById("authPw").value;
+  if(a==="signOut"){if(confirm("Uscire dall’account? Per rientrare ti servono email e password."))signOut()}
+  if(a==="gateMode"){const em=document.getElementById("authEmail");GATE={mode:b.dataset.v,email:em?em.value:""};AUTHMSG="";render()}
+  if(a==="guest"){try{localStorage.setItem(GUEST_KEY,"1")}catch(e){}AUTHMSG="";render()}
+  if(a==="signUp"){const em=document.getElementById("authEmail").value.trim(),pw=document.getElementById("authPw").value;GATE.email=em;
     if(!em||pw.length<6){AUTHMSG="Scrivi l’email e una password di almeno 6 caratteri.";render();return}
-    b.disabled=true;try{const r=await signUp(em,pw);AUTHMSG=r==="confirm"?"Account creato. Ti abbiamo mandato un’email: aprila e conferma, poi torna qui e premi Accedi.":"";}catch(e){AUTHMSG=authMessage(e)}render()}
+    b.disabled=true;try{const r=await signUp(em,pw);AUTHMSG=r==="confirm"?"Account creato, ma va confermato via email: apri il messaggio di Supabase, poi torna qui e accedi.":"";if(r==="confirm")GATE={mode:"login",email:em};}catch(e){AUTHMSG=authMessage(e)}render()}
   if(a==="saveP"){
     const d=document.getElementById("pDate").value||today(),kg=num(document.getElementById("pKg").value);
     if(kg<20||kg>400){toast("Inserisci un peso valido in kg");return}
