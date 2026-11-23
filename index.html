@@ -250,6 +250,9 @@ button.plate.on:active,button.cell.on:active{transform:scale(.92)}
 .linkbtn{border:0;background:none;padding:0;font:inherit;color:var(--ink);text-decoration:underline;text-decoration-color:var(--accent-line);text-decoration-thickness:2px;cursor:pointer}
 #sumDlg .sumbtns{flex-wrap:wrap}
 @media (max-width:560px){.cardiorow{grid-template-columns:1fr 1fr}.cardiorow label:last-child{grid-column:span 2}}
+/* account */
+.authform{display:grid;gap:10px;max-width:420px}
+.authmsg{margin:10px 0 0;padding:10px 12px;border-radius:8px;background:var(--surface2);border-left:4px solid var(--accent-line)}
 .chips label{border:1px solid var(--line);border-radius:99px;padding:5px 10px;font-size:14px;cursor:pointer;display:flex;gap:6px;align-items:center}
 
 /* ================= Splash di apertura ================= */
@@ -384,6 +387,7 @@ document.documentElement.classList.add("splashing");
   </div>
 </dialog>
 
+<script src="/config.js"></script>
 <script>
 /* ---------- Dati di riferimento ---------- */
 const MUSCLES = {
@@ -466,17 +470,112 @@ const num=v=>{const n=parseFloat(String(v).replace(",","."));return isFinite(n)?
 const r1=n=>Math.round(n*10)/10;
 
 /* ---------- Stato e salvataggio ---------- */
-const S={ready:false,mode:"local",workouts:[],weights:[],custom:{},templates:[],recDone:{}};
+const S={ready:false,mode:"local",workouts:[],weights:[],custom:{},templates:[],recDone:{},meta:{u:{},del:{}}};
 const LS_KEY="diario-palestra-v1";
 
 function loadLocal(){
-  try{const o=JSON.parse(localStorage.getItem(LS_KEY)||"{}");S.workouts=o.workouts||[];S.weights=o.weights||[];S.custom=o.custom||{};S.templates=o.templates||[];S.recDone=o.recDone||{}}catch(e){}
+  try{const o=JSON.parse(localStorage.getItem(LS_KEY)||"{}");S.workouts=o.workouts||[];S.weights=o.weights||[];S.custom=o.custom||{};S.templates=o.templates||[];S.recDone=o.recDone||{};
+    S.meta=o.meta&&o.meta.u&&o.meta.del?o.meta:{u:{},del:{}}}catch(e){}
+  SNAP=snapMap();
 }
-function saveLocal(){
-  try{localStorage.setItem(LS_KEY,JSON.stringify({workouts:S.workouts,weights:S.weights,custom:S.custom,templates:S.templates,recDone:S.recDone}))}catch(e){}
+// raw: salva senza segnare modifiche (usato dopo aver unito i dati dal cloud)
+function saveLocal(raw){
+  if(!raw)stamp();
+  try{localStorage.setItem(LS_KEY,JSON.stringify(docData()))}catch(e){}
+  if(!raw)scheduleSync();
 }
+const docData=()=>({v:1,workouts:S.workouts,weights:S.weights,custom:S.custom,templates:S.templates,recDone:S.recDone,meta:S.meta});
+
+/* ---------- Sincronizzazione tra dispositivi (Supabase) ----------
+   Ogni elemento ha una chiave (w:allenamento, p:peso, t:scheda, c:esercizio, r:recuperi del giorno)
+   e l'ora della sua ultima modifica in meta.u; le eliminazioni restano in meta.del.
+   Unendo due dispositivi vince la modifica più recente, elemento per elemento. */
+let SNAP=new Map();let app_onFocusOut=()=>{};
+function snapMap(){const m=new Map();
+  for(const w of S.workouts)m.set("w:"+w.id,JSON.stringify(w));
+  for(const x of S.weights)m.set("p:"+x.id,JSON.stringify(x));
+  for(const t of S.templates)m.set("t:"+t.id,JSON.stringify(t));
+  for(const [k,v] of Object.entries(S.custom))m.set("c:"+k,JSON.stringify(v));
+  for(const [k,v] of Object.entries(S.recDone))m.set("r:"+k,JSON.stringify(v));
+  return m}
+function stamp(){const now=Date.now(),cur=snapMap();
+  for(const [k,v] of cur)if(SNAP.get(k)!==v){S.meta.u[k]=now;delete S.meta.del[k]}
+  for(const k of SNAP.keys())if(!cur.has(k)){S.meta.del[k]=now;delete S.meta.u[k]}
+  SNAP=cur}
+function mergeRemote(r){
+  if(!r||typeof r!=="object")return false;
+  const before=JSON.stringify(docData());
+  const ru=(r.meta&&r.meta.u)||{},rd=(r.meta&&r.meta.del)||{},lu=S.meta.u,ld=S.meta.del;
+  const del={...ld};for(const [k,t] of Object.entries(rd))if(!(del[k]>=t))del[k]=t;
+  const u={};
+  const pick=(k,lv,rv)=>{const a=lv===undefined?-1:(lu[k]||0),b=rv===undefined?-1:(ru[k]||0);
+    const [v,t]=b>a?[rv,b]:[lv,a];if(v===undefined)return undefined;if(del[k]!==undefined&&del[k]>=t)return undefined;u[k]=t;return v};
+  const arr=(name,pre)=>{const L=new Map(S[name].map(x=>[pre+x.id,x])),R=new Map((Array.isArray(r[name])?r[name]:[]).filter(x=>x&&x.id).map(x=>[pre+x.id,x]));
+    const out=[];for(const k of new Set([...L.keys(),...R.keys()])){const v=pick(k,L.get(k),R.get(k));if(v!==undefined)out.push(v)}return out};
+  const obj=(name,pre)=>{const L=S[name]||{},R=(r[name]&&typeof r[name]==="object")?r[name]:{},out={};
+    for(const k of new Set([...Object.keys(L),...Object.keys(R)])){const v=pick(pre+k,L[k],R[k]);if(v!==undefined)out[k]=v}return out};
+  S.workouts=arr("workouts","w:");S.weights=arr("weights","p:");S.templates=arr("templates","t:");
+  S.custom=obj("custom","c:");S.recDone=obj("recDone","r:");
+  const old=Date.now()-120*864e5;for(const k of Object.keys(del))if(del[k]<old)delete del[k];
+  S.meta={u,del};SNAP=snapMap();saveLocal(true);
+  return JSON.stringify(docData())!==before;
+}
+const SB=(()=>{const c=window.LIFTLOG_SUPABASE||{};const url=String(c.url||"").trim().replace(/\/+$/,"").replace(/\/(rest|auth)\/v1$/,""),key=String(c.key||"").trim();
+  return /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)&&key?{url,key}:null})();
+const AUTH_KEY="liftlog-auth";
+let AUTH=null;try{AUTH=JSON.parse(localStorage.getItem(AUTH_KEY)||"null")}catch(e){}
+const SYNC={state:"idle",last:0,busy:false,again:false,timer:0};
+function setAuth(a){AUTH=a;try{a?localStorage.setItem(AUTH_KEY,JSON.stringify(a)):localStorage.removeItem(AUTH_KEY)}catch(e){}}
+function sessionFrom(j){if(!j||!j.access_token)return null;
+  return {access_token:j.access_token,refresh_token:j.refresh_token,expires_at:j.expires_at||Math.floor(Date.now()/1000)+(j.expires_in||3600),user:{id:j.user&&j.user.id,email:j.user&&j.user.email}}}
+async function sbReq(path,{method="GET",body,auth=true,prefer}={}){
+  const h={"apikey":SB.key,"Content-Type":"application/json"};
+  if(auth){await freshToken();h.Authorization="Bearer "+AUTH.access_token}
+  if(prefer)h.Prefer=prefer;
+  const r=await fetch(SB.url+path,{method,headers:h,body:body===undefined?undefined:JSON.stringify(body)});
+  const t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
+  if(!r.ok){const err=new Error((j&&(j.msg||j.message||j.error_description||j.error))||("Errore "+r.status));err.status=r.status;err.code=j&&(j.error_code||j.code);throw err}
+  return j}
+async function freshToken(){
+  if(!AUTH)throw Object.assign(new Error("Non collegato"),{status:401});
+  if(Date.now()/1000<AUTH.expires_at-60)return;
+  try{const j=await sbReq("/auth/v1/token?grant_type=refresh_token",{method:"POST",auth:false,body:{refresh_token:AUTH.refresh_token}});setAuth(sessionFrom(j)||AUTH)}
+  catch(e){if(e.status&&e.status<500){setAuth(null);SYNC.state="idle";render()}throw e}}
+function authMessage(e){const m=String(e.message||"").toLowerCase(),c=String(e.code||"");
+  if(c==="invalid_credentials"||m.includes("invalid login"))return "Email o password sbagliate.";
+  if(c==="email_not_confirmed"||m.includes("not confirmed"))return "Prima conferma l’email: apri il messaggio che ti ha mandato Supabase, poi accedi qui.";
+  if(c==="user_already_exists"||m.includes("already registered"))return "Esiste già un account con questa email: usa Accedi.";
+  if(c==="weak_password"||m.includes("password should"))return "Password troppo corta: usa almeno 6 caratteri.";
+  if(m.includes("failed to fetch")||m.includes("network"))return "Nessuna connessione. Riprova quando sei online.";
+  return "Non è andata: "+e.message}
+async function signIn(email,password){const j=await sbReq("/auth/v1/token?grant_type=password",{method:"POST",auth:false,body:{email,password}});setAuth(sessionFrom(j));await syncNow(true)}
+async function signUp(email,password){const j=await sbReq("/auth/v1/signup",{method:"POST",auth:false,body:{email,password}});
+  const ses=sessionFrom(j);if(ses){setAuth(ses);await syncNow(true);return "ok"}return "confirm"}
+async function signOut(){try{if(AUTH)await sbReq("/auth/v1/logout",{method:"POST"})}catch(e){}setAuth(null);SYNC.state="idle";render()}
+function scheduleSync(){if(!SB||!AUTH)return;clearTimeout(SYNC.timer);SYNC.timer=setTimeout(()=>syncNow(),1500)}
+let pendingRender=false;
+const typing=()=>{const a=document.activeElement;return a&&app.contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)};
+async function syncNow(force){
+  if(!SB||!AUTH)return;
+  if(SYNC.busy){SYNC.again=true;return}
+  SYNC.busy=true;SYNC.state="syncing";updateMode();
+  try{
+    const uid=AUTH.user.id;
+    const rows=await sbReq(`/rest/v1/liftlog_data?select=data&user_id=eq.${encodeURIComponent(uid)}`);
+    const changed=rows&&rows[0]?mergeRemote(rows[0].data):false;
+    await sbReq("/rest/v1/liftlog_data?on_conflict=user_id",{method:"POST",prefer:"resolution=merge-duplicates,return=minimal",body:{user_id:uid,data:docData(),updated_at:new Date().toISOString()}});
+    SYNC.state="ok";SYNC.last=Date.now();
+    if(changed||force){if(typing())pendingRender=true;else render()}
+  }catch(e){SYNC.state=!navigator.onLine||String(e.message).toLowerCase().includes("fetch")?"offline":"error";SYNC.err=e.message}
+  finally{SYNC.busy=false;updateMode();if(SYNC.again){SYNC.again=false;scheduleSync()}}
+}
+app_onFocusOut=()=>{if(pendingRender&&!typing()){pendingRender=false;render()}};
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")syncNow()});
+addEventListener("online",()=>syncNow());
 async function boot(){
   loadLocal();S.ready=true;render();
+  app.addEventListener("focusout",()=>setTimeout(app_onFocusOut,50));
+  syncNow();
   try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
 }
 async function putWorkout(w){
@@ -499,7 +598,10 @@ async function putCustom(){
   saveLocal();
 }
 function toast(msg){const m=document.getElementById("saveMode");m.textContent=msg;clearTimeout(toast.t);toast.t=setTimeout(updateMode,2500)}
-function updateMode(){document.getElementById("saveMode").textContent="Salvato su questo dispositivo"}
+function updateMode(){const el=document.getElementById("saveMode");
+  if(!SB||!AUTH){el.textContent="Salvato su questo dispositivo";return}
+  const hm=d=>`${pad(new Date(d).getHours())}:${pad(new Date(d).getMinutes())}`;
+  el.textContent=SYNC.state==="syncing"?"Sincronizzo…":SYNC.state==="ok"?`Sincronizzato alle ${hm(SYNC.last)}`:SYNC.state==="offline"?"Offline: sincronizzo appena torna la rete":SYNC.state==="error"?"Sincronizzazione non riuscita":"Collegato"}
 
 /* ---------- Calcoli ---------- */
 const exInfo=name=>LIB[name]||S.custom[name]||{t:"free",p:[],s:[]};
@@ -757,6 +859,22 @@ function lastSetsFor(name,beforeDate){
   for(let i=ws.length-1;i>=0;i--){const e=ws[i].exercises.find(x=>x.name===name);if(e)return {date:ws[i].date,e}}
   return null;
 }
+let AUTHMSG="";
+function accountCard(){
+  if(!SB)return "";
+  if(AUTH)return `<section class="card acct"><h3>Account e sincronizzazione</h3>
+    <p class="small" style="margin-top:-6px">Collegato come <b>${esc(AUTH.user.email||"")}</b>. Accedi con lo stesso account sul PC o su un altro telefono: allenamenti, schede e peso sono gli stessi ovunque.</p>
+    <p class="small muted">${SYNC.state==="ok"?`Ultima sincronizzazione: oggi alle ${pad(new Date(SYNC.last).getHours())}:${pad(new Date(SYNC.last).getMinutes())}`:SYNC.state==="offline"?"Sei offline: i dati sono salvati sul dispositivo e si sincronizzano appena torna la rete.":SYNC.state==="error"?`Sincronizzazione non riuscita: ${esc(SYNC.err||"")}`:"Sincronizzazione in corso…"}</p>
+    <div class="row"><button class="btn" data-act="syncNow">Sincronizza ora</button><button class="btn ghost" data-act="signOut">Esci</button></div></section>`;
+  return `<section class="card acct"><h3>Usa LiftLog anche dal PC</h3>
+    <p class="small" style="margin-top:-6px">Crea un account e accedi con la stessa email su telefono e PC: allenamenti, schede e peso si sincronizzano da soli. I dati che hai già su questo dispositivo non si perdono.</p>
+    <form id="authForm" class="authform" autocomplete="on">
+      <label class="f">Email<input type="email" id="authEmail" autocomplete="username" required></label>
+      <label class="f">Password<input type="password" id="authPw" autocomplete="current-password" minlength="6" required></label>
+      <div class="row"><button class="btn primary" type="submit">Accedi</button><button class="btn" type="button" data-act="signUp">Crea account</button></div>
+    </form>
+    ${AUTHMSG?`<p class="small authmsg">${esc(AUTHMSG)}</p>`:""}</section>`;
+}
 function viewLog(){
   const exHtml=draft.exercises.map((e,ei)=>{
     const info=exInfo(e.name),last=lastSetsFor(e.name,draft.date);
@@ -812,6 +930,7 @@ function viewLog(){
     </div>
   </section>
   ${S.workouts.length?`<p class="small muted histhint">I tuoi allenamenti: tocca un fulmine qui sopra o apri il calendario in <button class="linkbtn" data-act="goCal">Progressi</button>.</p>`:""}
+  ${accountCard()}
   <section class="card"><h3>Backup dei dati</h3>
     <p class="small muted" style="margin-top:-6px">I dati restano solo su questo telefono. Scarica un backup ogni tanto: ti serve per non perderli se cambi telefono o cancelli i dati del browser.</p>
     <div class="row"><button class="btn" data-act="export">Scarica backup</button>
@@ -1085,6 +1204,13 @@ app.addEventListener("change",e=>{
     }).catch(()=>toast("File di backup non valido"));
   }
 });
+app.addEventListener("submit",async e=>{
+  if(e.target.id!=="authForm")return;e.preventDefault();
+  const em=document.getElementById("authEmail").value.trim(),pw=document.getElementById("authPw").value;
+  const btn=e.target.querySelector('[type="submit"]');btn.disabled=true;btn.textContent="Accesso…";
+  try{await signIn(em,pw);AUTHMSG="";toast("Collegato: dati sincronizzati")}catch(err){AUTHMSG=authMessage(err)}
+  render();
+});
 app.addEventListener("click",async e=>{
   const b=e.target.closest("[data-act]");if(!b)return;
   const a=b.dataset.act,ei=+b.dataset.ei;
@@ -1139,6 +1265,11 @@ app.addEventListener("click",async e=>{
   if(a==="delW"){if(confirm("Eliminare questo allenamento?")){try{await delWorkout(b.dataset.id);if(draft.id===b.dataset.id)draft=newDraft();render();toast("Allenamento eliminato")}catch(err){toast("Eliminazione non riuscita")}}}
   if(a==="goWeight"){TAB="weight";render()}
   if(a==="goCal"){TAB="progress";render();window.scrollTo(0,0)}
+  if(a==="syncNow"){syncNow(true)}
+  if(a==="signOut"){if(confirm("Uscire dall’account? I dati restano anche su questo dispositivo."))signOut()}
+  if(a==="signUp"){const em=document.getElementById("authEmail").value.trim(),pw=document.getElementById("authPw").value;
+    if(!em||pw.length<6){AUTHMSG="Scrivi l’email e una password di almeno 6 caratteri.";render();return}
+    b.disabled=true;try{const r=await signUp(em,pw);AUTHMSG=r==="confirm"?"Account creato. Ti abbiamo mandato un’email: aprila e conferma, poi torna qui e premi Accedi.":"";}catch(e){AUTHMSG=authMessage(e)}render()}
   if(a==="saveP"){
     const d=document.getElementById("pDate").value||today(),kg=num(document.getElementById("pKg").value);
     if(kg<20||kg>400){toast("Inserisci un peso valido in kg");return}

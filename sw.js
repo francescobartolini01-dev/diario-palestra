@@ -1,6 +1,6 @@
 // Service worker: l'app funziona anche offline in palestra.
-const CACHE = "diario-palestra-v13";
-const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png", "/logo.svg", "/logo-animated.svg"];
+const CACHE = "diario-palestra-v14";
+const SHELL = ["/", "/index.html", "/config.js", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png", "/logo.svg", "/logo-animated.svg"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -11,7 +11,8 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   const req = e.request;
   const url = new URL(req.url);
-  if (req.method !== "GET" || url.pathname.startsWith("/api/")) return;
+  // le chiamate a Supabase non passano dalla cache
+  if (req.method !== "GET" || url.pathname.startsWith("/api/") || url.host.endsWith(".supabase.co")) return;
   // Rete prima, cache come riserva: così vedi sempre l'ultima versione quando sei online.
   e.respondWith(
     fetch(req).then(res => {
