@@ -1,5 +1,5 @@
 // Service worker: l'app funziona anche offline in palestra.
-const CACHE = "diario-palestra-v15";
+const CACHE = "diario-palestra-v16";
 const SHELL = ["/", "/index.html", "/config.js", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png", "/logo.svg", "/logo-animated.svg"];
 
 self.addEventListener("install", e => {
